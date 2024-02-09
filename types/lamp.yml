@@ -1,0 +1,50 @@
+---
+- name: "Deploying  LAMP stack"
+  hosts: webservers
+  become: yes
+  tasks:
+    - name: "INstall Latest Packages"
+      yum:
+        name:
+          - httpd
+          - mariadb-server
+          - php
+          - php-mysqlnd
+          - firewalld
+        state: latest
+    - name: "Copy contents"
+      ansible.builtin.copy:
+        content: "Test LAMP stack"
+        dest: /var/www/html/index.html
+    - name: "Enable and Start HTTPD service"
+      service:
+        name: httpd
+        state: started
+        enabled: yes
+    - name: "Enable and Start Mariadb service"
+      service:
+        name: mariadb
+        state: started
+        enabled: yes
+    - name: "Enable and Start Firewalld service"
+      service:
+        name: firewalld
+        state: started
+        enabled: yes
+
+    - name: " Add exception in the firewall"
+      firewalld:
+        service: http
+        permanent: yes
+        state: enabled
+        immediate: yes
+
+- name: Test Page
+  hosts: localhost
+  tasks:
+    - name: access Page
+      uri:
+        url: http://eoc-node1
+        status_code: 200
+
+
